@@ -6,7 +6,7 @@ class ThemeDataLight {
   static const Color mainBgColor = Color(0xFFF0F0F0);
   static ThemeData theme(BuildContext context) {
     final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF293CA0),
+      seedColor: const Color(0xFF4F46E5),
       brightness: Brightness.light,
       surface: mainBgColor,
     );

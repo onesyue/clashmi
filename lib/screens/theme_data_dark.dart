@@ -2,11 +2,11 @@ import 'package:clashmi/screens/theme_define.dart';
 import 'package:flutter/material.dart';
 
 class ThemeDataDark {
-  static const Color mainColor = Color(0xFF303030);
-  static const Color mainBgColor = Color(0xff121212);
+  static const Color mainColor = Color(0xFF1A1A2E);
+  static const Color mainBgColor = Color(0xFF0D0D1A);
   static ThemeData theme(BuildContext context) {
     final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF293CA0),
+      seedColor: const Color(0xFF4F46E5),
       brightness: Brightness.dark,
       surface: mainBgColor,
     );

@@ -22,7 +22,7 @@ abstract final class HttpUtils {
   static Future<String> getUserAgent() async {
     String version = AppUtils.getBuildinVersion();
     final coreVersion = AppUtils.getCoreVersion();
-    return "ClashMi/$version platform/${Platform.operatingSystem} ClashMeta/$coreVersion; mihomo/$coreVersion";
+    return "YueTong/$version platform/${Platform.operatingSystem} ClashMeta/$coreVersion; mihomo/$coreVersion";
   }
 
   static Future<ReturnResult<Tuple2<int, HttpHeaders>>> httpHeadRequest(

@@ -55,7 +55,7 @@ class InAppWebViewScreen extends StatefulWidget {
         _defaultUserAgent = "$_defaultUserAgent Safari/605.1.15";
       }
       _defaultUserAgentWithKaring =
-          "$_defaultUserAgent Clash Mi/${AppUtils.getBuildinVersion()}";
+          "$_defaultUserAgent YueTong/${AppUtils.getBuildinVersion()}";
     } else {
       late String userAgent;
       String edgeVer = "131";
@@ -67,7 +67,7 @@ class InAppWebViewScreen extends StatefulWidget {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$edgeVer.0.0.0 Safari/537.36";
       }
       _defaultUserAgentWithKaring =
-          "$userAgent Clash Mi/${AppUtils.getBuildinVersion()}";
+          "$userAgent YueTong/${AppUtils.getBuildinVersion()}";
     }
     _inited = true;
   }

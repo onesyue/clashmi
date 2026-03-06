@@ -13,7 +13,7 @@ abstract final class AppUtils {
   }
 
   static String getName() {
-    return "Clash Mi";
+    return "悦通";
   }
 
   static String getReleaseVersion() {
