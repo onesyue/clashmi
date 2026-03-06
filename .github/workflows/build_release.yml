@@ -1,0 +1,119 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout clashmi
+        uses: actions/checkout@v4
+
+      - name: Checkout libclash-vpn-service
+        uses: actions/checkout@v4
+        with:
+          repository: KaringX/libclash-vpn-service
+          path: ../libclash-vpn-service
+          token: ${{ secrets.LIBCLASH_TOKEN }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.0'
+          channel: master
+          cache: true
+
+      - name: Use git dependency for libclash-vpn-service
+        run: |
+          cat >> pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            libclash_vpn_service:
+              path: ../libclash-vpn-service
+          EOF
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p android/private/clashmi/android/sign
+          echo "$KEYSTORE_BASE64" | base64 -d > android/private/clashmi/android/sign/clashmi.release.keystore
+
+      - name: Write key.properties
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword.debug=$STORE_PASSWORD
+          keyPassword.debug=$KEY_PASSWORD
+          keyAlias.debug=$KEY_ALIAS
+          storeFile.debug=../private/clashmi/android/sign/clashmi.release.keystore
+
+          storePassword.release=$STORE_PASSWORD
+          keyPassword.release=$KEY_PASSWORD
+          keyAlias.release=$KEY_ALIAS
+          storeFile.release=../private/clashmi/android/sign/clashmi.release.keystore
+          EOF
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build APK (arm64)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Build APK (arm32)
+        run: flutter build apk --release --target-platform android-arm
+
+      - name: Build APK (universal)
+        run: flutter build apk --release
+
+      - name: Rename APKs
+        run: |
+          TAG="${{ github.ref_name }}"
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/clashmi-${TAG}-arm64.apk
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk build/app/outputs/flutter-apk/clashmi-${TAG}-arm32.apk
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/clashmi-${TAG}-universal.apk
+
+      - name: Upload APKs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apks
+          path: build/app/outputs/flutter-apk/clashmi-*.apk
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-android]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: artifacts/*
+          generate_release_notes: true
